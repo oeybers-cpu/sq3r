@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SQ3R Study Method Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --maroon: #800020;
@@ -36,6 +37,7 @@
             margin-bottom: 30px;
             padding-bottom: 20px;
             border-bottom: 2px solid var(--maroon);
+            position: relative;
         }
         
         h1 {
@@ -43,11 +45,20 @@
             margin-bottom: 10px;
         }
         
+        .logo {
+            position: absolute;
+            top: 0;
+            left: 0;
+            font-size: 24px;
+            color: var(--maroon);
+        }
+        
         .progress-container {
             background-color: var(--light-gray);
             border-radius: var(--border-radius);
             padding: 15px;
             margin-bottom: 30px;
+            position: relative;
         }
         
         .progress-bar {
@@ -75,15 +86,15 @@
             left: 0;
             transform: translateY(-50%);
             height: 4px;
-            width: 0%;
+            width: var(--progress, 0%);
             background-color: var(--maroon);
             z-index: 1;
             transition: width 0.5s ease;
         }
         
         .step {
-            width: 30px;
-            height: 30px;
+            width: 35px;
+            height: 35px;
             border-radius: 50%;
             background-color: #ddd;
             display: flex;
@@ -93,11 +104,13 @@
             position: relative;
             z-index: 2;
             cursor: pointer;
+            transition: all 0.3s ease;
         }
         
         .step.active {
             background-color: var(--maroon);
             color: white;
+            transform: scale(1.1);
         }
         
         .step.completed {
@@ -107,7 +120,7 @@
         
         .step-label {
             position: absolute;
-            top: 35px;
+            top: 40px;
             left: 50%;
             transform: translateX(-50%);
             white-space: nowrap;
@@ -123,6 +136,12 @@
             padding: 25px;
             margin-bottom: 20px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         .section.active {
@@ -132,6 +151,12 @@
         h2 {
             color: var(--maroon);
             margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        h2 i {
+            margin-right: 10px;
         }
         
         .instruction {
@@ -159,6 +184,13 @@
             border-radius: var(--border-radius);
             resize: vertical;
             font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        textarea:focus {
+            border-color: var(--maroon);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(128, 0, 32, 0.2);
         }
         
         .feedback {
@@ -190,7 +222,13 @@
             border-radius: var(--border-radius);
             cursor: pointer;
             font-weight: bold;
-            transition: background-color 0.3s;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+        }
+        
+        button i {
+            margin-right: 8px;
         }
         
         .btn-prev {
@@ -209,18 +247,31 @@
         
         .btn-next:hover, .btn-submit:hover {
             background-color: var(--light-maroon);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         
         .checkbox-container {
             display: flex;
             align-items: center;
             margin: 20px 0;
+            padding: 15px;
+            background-color: var(--light-gray);
+            border-radius: var(--border-radius);
         }
         
         .checkbox-container input {
             margin-right: 10px;
             width: 20px;
             height: 20px;
+            accent-color: var(--maroon);
+        }
+        
+        .save-status {
+            text-align: right;
+            font-size: 14px;
+            color: #777;
+            margin-top: 10px;
         }
         
         footer {
@@ -242,7 +293,7 @@
             .progress-bar::before, .progress-bar::after {
                 width: 4px;
                 height: 100%;
-                left: 13px;
+                left: 17px;
                 top: 0;
                 transform: none;
             }
@@ -256,12 +307,25 @@
                 left: 45px;
                 transform: translateY(-50%);
             }
+            
+            .btn-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .btn-prev, .btn-next {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
+            <div class="logo">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
             <h1>SQ3R Study Method</h1>
             <p>An effective approach to actively reading and studying academic materials</p>
         </header>
@@ -293,7 +357,7 @@
         
         <!-- Survey Section -->
         <div class="section active" id="section-1">
-            <h2>1. Survey (Scan the Section)</h2>
+            <h2><i class="fas fa-binoculars"></i> 1. Survey (Scan the Section)</h2>
             <div class="instruction">
                 <p>Quickly scan the section to get an overview. Focus on headings, subheadings, bold terms, diagrams, and summaries.</p>
             </div>
@@ -313,43 +377,51 @@
                 <textarea placeholder="Type your observations here..."></textarea>
             </div>
             
+            <div class="save-status">
+                <i class="fas fa-save"></i> Responses are saved automatically
+            </div>
+            
             <div class="btn-container">
-                <button class="btn-prev" disabled>Previous</button>
-                <button class="btn-next" data-next="2">Next: Question</button>
+                <button class="btn-prev" disabled><i class="fas fa-arrow-left"></i> Previous</button>
+                <button class="btn-next" data-next="2">Next: Question <i class="fas fa-arrow-right"></i></button>
             </div>
         </div>
         
         <!-- Question Section -->
         <div class="section" id="section-2">
-            <h2>2. Question (Generate Questions Before Reading)</h2>
+            <h2><i class="fas fa-question-circle"></i> 2. Question (Generate Questions Before Reading)</h2>
             <div class="instruction">
                 <p>Turn the headings and key points into questions to guide your reading.</p>
             </div>
             
             <div class="prompt">
                 <p>What is the main idea or purpose of this section?</p>
-                <textarea placeholder="Type your question here..."></textarea>
+                <textarea placeholder="Type your response here..."></textarea>
             </div>
             
             <div class="prompt">
                 <p>How does this information connect to what I already know?</p>
-                <textarea placeholder="Type your question here..."></textarea>
+                <textarea placeholder="Type your response here..."></textarea>
             </div>
             
             <div class="prompt">
                 <p>Why is this concept important or how can it be applied?</p>
-                <textarea placeholder="Type your question here..."></textarea>
+                <textarea placeholder="Type your response here..."></textarea>
+            </div>
+            
+            <div class="save-status">
+                <i class="fas fa-save"></i> Responses are saved automatically
             </div>
             
             <div class="btn-container">
-                <button class="btn-prev" data-prev="1">Previous</button>
-                <button class="btn-next" data-next="3">Next: Read</button>
+                <button class="btn-prev" data-prev="1"><i class="fas fa-arrow-left"></i> Previous</button>
+                <button class="btn-next" data-next="3">Next: Read <i class="fas fa-arrow-right"></i></button>
             </div>
         </div>
         
         <!-- Read Section -->
         <div class="section" id="section-3">
-            <h2>3. Read (Read Actively to Answer Your Questions)</h2>
+            <h2><i class="fas fa-book-reader"></i> 3. Read (Read Actively to Answer Your Questions)</h2>
             <div class="instruction">
                 <p>Read the section carefully, looking for answers to your questions.</p>
             </div>
@@ -360,42 +432,46 @@
             </div>
             
             <div class="btn-container">
-                <button class="btn-prev" data-prev="2">Previous</button>
-                <button class="btn-next" data-next="4">Next: Recite</button>
+                <button class="btn-prev" data-prev="2"><i class="fas fa-arrow-left"></i> Previous</button>
+                <button class="btn-next" data-next="4">Next: Recite <i class="fas fa-arrow-right"></i></button>
             </div>
         </div>
         
         <!-- Recite Section -->
         <div class="section" id="section-4">
-            <h2>4. Recite (Summarize and Recall Key Points)</h2>
+            <h2><i class="fas fa-microphone-alt"></i> 4. Recite (Summarize and Recall Key Points)</h2>
             <div class="instruction">
                 <p>Without looking at the text, write down or say aloud what you remember.</p>
             </div>
             
             <div class="prompt">
                 <p>What are the three most important points from this section?</p>
-                <textarea placeholder="Type your summary here..."></textarea>
+                <textarea placeholder="Type your spoken response here"></textarea>
             </div>
             
             <div class="prompt">
                 <p>Can I explain the concept in my own words?</p>
-                <textarea placeholder="Type your explanation here..."></textarea>
+                <textarea placeholder="Type your spoken response here"></textarea>
             </div>
             
             <div class="prompt">
                 <p>What examples or analogies help me understand this better?</p>
-                <textarea placeholder="Type your examples here..."></textarea>
+                <textarea placeholder="Type your spoken response here"></textarea>
+            </div>
+            
+            <div class="save-status">
+                <i class="fas fa-save"></i> Responses are saved automatically
             </div>
             
             <div class="btn-container">
-                <button class="btn-prev" data-prev="3">Previous</button>
-                <button class="btn-next" data-next="5">Next: Review</button>
+                <button class="btn-prev" data-prev="3"><i class="fas fa-arrow-left"></i> Previous</button>
+                <button class="btn-next" data-next="5">Next: Review <i class="fas fa-arrow-right"></i></button>
             </div>
         </div>
         
         <!-- Review Section -->
         <div class="section" id="section-5">
-            <h2>5. Review (Reflect and Reinforce Learning)</h2>
+            <h2><i class="fas fa-search"></i> 5. Review (Reflect and Reinforce Learning)</h2>
             <div class="instruction">
                 <p>Go back over the section and your notes to reinforce understanding.</p>
             </div>
@@ -419,9 +495,13 @@
                 <p><strong>Review Tip:</strong> Consider revisiting this section in 24 hours and then again in a week to strengthen long-term retention.</p>
             </div>
             
+            <div class="save-status">
+                <i class="fas fa-save"></i> Responses are saved automatically
+            </div>
+            
             <div class="btn-container">
-                <button class="btn-prev" data-prev="4">Previous</button>
-                <button class="btn-submit" id="btn-complete">Complete SQ3R Process</button>
+                <button class="btn-prev" data-prev="4"><i class="fas fa-arrow-left"></i> Previous</button>
+                <button class="btn-submit" id="btn-complete"><i class="fas fa-check-circle"></i> Complete SQ3R Process</button>
             </div>
         </div>
         
@@ -442,6 +522,39 @@
             // Set up progress bar
             const progressBar = document.querySelector('.progress-bar');
             
+            // Save responses to localStorage
+            function saveResponses() {
+                const textareas = document.querySelectorAll('textarea');
+                textareas.forEach((textarea, index) => {
+                    localStorage.setItem(`response-${index}`, textarea.value);
+                });
+                
+                // Show saved message
+                const saveStatus = document.querySelector('.save-status');
+                if (saveStatus) {
+                    saveStatus.style.color = '#2ecc71';
+                    setTimeout(() => {
+                        saveStatus.style.color = '#777';
+                    }, 1000);
+                }
+            }
+            
+            // Load saved responses
+            function loadResponses() {
+                const textareas = document.querySelectorAll('textarea');
+                textareas.forEach((textarea, index) => {
+                    const savedValue = localStorage.getItem(`response-${index}`);
+                    if (savedValue) {
+                        textarea.value = savedValue;
+                    }
+                });
+            }
+            
+            // Auto-save when user types
+            document.querySelectorAll('textarea').forEach(textarea => {
+                textarea.addEventListener('input', saveResponses);
+            });
+            
             // Function to update the progress
             function updateProgress(currentStep) {
                 // Update steps
@@ -458,13 +571,16 @@
                 
                 // Update progress bar
                 const progressPercentage = ((currentStep - 1) / (steps.length - 1)) * 100;
-                progressBar.style.setProperty('--progress', `${progressPercentage}%`);
+                document.documentElement.style.setProperty('--progress', `${progressPercentage}%`);
                 
                 // Update sections
                 sections.forEach(section => {
                     section.classList.remove('active');
                 });
                 document.getElementById(`section-${currentStep}`).classList.add('active');
+                
+                // Load saved responses for this section
+                loadResponses();
             }
             
             // Next button functionality
@@ -493,7 +609,7 @@
             
             // Complete button functionality
             completeButton.addEventListener('click', function() {
-                alert('Congratulations! You have completed the SQ3R process. Remember to save your work!');
+                alert('Congratulations! You have completed the SQ3R process. Your responses have been saved.');
                 
                 // Here you would typically send data to a server
                 // For now, we'll just log to console
@@ -508,8 +624,9 @@
                 });
             });
             
-            // Initialize the first step
+            // Initialize the first step and load any saved responses
             updateProgress(1);
+            loadResponses();
         });
     </script>
 </body>
