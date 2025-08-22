@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQ3R Study Method Assistant</title>
+    <style>
+        :root {
+            --maroon: #800020;
+            --light-maroon: #a8324c;
+            --light-gray: #f5f5f5;
+            --border-radius: 8px;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: white;
+            color: black;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--maroon);
+        }
+        
+        h1 {
+            color: var(--maroon);
+            margin-bottom: 10px;
+        }
+        
+        .progress-container {
+            background-color: var(--light-gray);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+        }
+        
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            height: 4px;
+            width: 100%;
+            background-color: #ddd;
+            z-index: 1;
+        }
+        
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            height: 4px;
+            width: 0%;
+            background-color: var(--maroon);
+            z-index: 1;
+            transition: width 0.5s ease;
+        }
+        
+        .step {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            position: relative;
+            z-index: 2;
+            cursor: pointer;
+        }
+        
+        .step.active {
+            background-color: var(--maroon);
+            color: white;
+        }
+        
+        .step.completed {
+            background-color: var(--light-maroon);
+            color: white;
+        }
+        
+        .step-label {
+            position: absolute;
+            top: 35px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .section {
+            display: none;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        h2 {
+            color: var(--maroon);
+            margin-bottom: 15px;
+        }
+        
+        .instruction {
+            background-color: var(--light-gray);
+            padding: 15px;
+            border-left: 4px solid var(--maroon);
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        
+        .prompt {
+            margin-bottom: 20px;
+        }
+        
+        .prompt p {
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            resize: vertical;
+            font-size: 16px;
+        }
+        
+        .feedback {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: var(--border-radius);
+            display: none;
+        }
+        
+        .feedback.positive {
+            background-color: #e6f7ee;
+            border-left: 4px solid #2ecc71;
+        }
+        
+        .feedback.constructive {
+            background-color: #fff8e6;
+            border-left: 4px solid #f39c12;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-prev {
+            background-color: var(--light-gray);
+            color: black;
+        }
+        
+        .btn-prev:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .btn-next, .btn-submit {
+            background-color: var(--maroon);
+            color: white;
+        }
+        
+        .btn-next:hover, .btn-submit:hover {
+            background-color: var(--light-maroon);
+        }
+        
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+        }
+        
+        .checkbox-container input {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #777;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            .progress-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                height: 300px;
+            }
+            
+            .progress-bar::before, .progress-bar::after {
+                width: 4px;
+                height: 100%;
+                left: 13px;
+                top: 0;
+                transform: none;
+            }
+            
+            .step {
+                margin-bottom: 40px;
+            }
+            
+            .step-label {
+                top: 50%;
+                left: 45px;
+                transform: translateY(-50%);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>SQ3R Study Method</h1>
+            <p>An effective approach to actively reading and studying academic materials</p>
+        </header>
+        
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="step active" data-step="1">
+                    1
+                    <span class="step-label">Survey</span>
+                </div>
+                <div class="step" data-step="2">
+                    2
+                    <span class="step-label">Question</span>
+                </div>
+                <div class="step" data-step="3">
+                    3
+                    <span class="step-label">Read</span>
+                </div>
+                <div class="step" data-step="4">
+                    4
+                    <span class="step-label">Recite</span>
+                </div>
+                <div class="step" data-step="5">
+                    5
+                    <span class="step-label">Review</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Survey Section -->
+        <div class="section active" id="section-1">
+            <h2>1. Survey (Scan the Section)</h2>
+            <div class="instruction">
+                <p>Quickly scan the section to get an overview. Focus on headings, subheadings, bold terms, diagrams, and summaries.</p>
+            </div>
+            
+            <div class="prompt">
+                <p>What are the main headings or themes in this section?</p>
+                <textarea placeholder="Type your observations here..."></textarea>
+            </div>
+            
+            <div class="prompt">
+                <p>Which key terms or concepts stand out?</p>
+                <textarea placeholder="Type your observations here..."></textarea>
+            </div>
+            
+            <div class="prompt">
+                <p>What do the images, graphs, or diagrams suggest about the content?</p>
+                <textarea placeholder="Type your observations here..."></textarea>
+            </div>
+            
+            <div class="btn-container">
+                <button class="btn-prev" disabled>Previous</button>
+                <button class="btn-next" data-next="2">Next: Question</button>
+            </div>
+        </div>
+        
+        <!-- Question Section -->
+        <div class="section" id="section-2">
+            <h2>2. Question (Generate Questions Before Reading)</h2>
+            <div class="instruction">
+                <p>Turn the headings and key points into questions to guide your reading.</p>
+            </div>
+            
+            <div class="prompt">
+                <p>What is the main idea or purpose of this section?</p>
+                <textarea placeholder="Type your question here..."></textarea>
+            </div>
+            
+            <div class="prompt">
+                <p>How does this information connect to what I already know?</p>
+                <textarea placeholder="Type your question here..."></textarea>
+            </div>
+            
+            <div class="prompt">
+                <p>Why is this concept important or how can it be applied?</p>
+                <textarea placeholder="Type your question here..."></textarea>
+            </div>
+            
+            <div class="btn-container">
+                <button class="btn-prev" data-prev="1">Previous</button>
+                <button class="btn-next" data-next="3">Next: Read</button>
+            </div>
+        </div>
+        
+        <!-- Read Section -->
+        <div class="section" id="section-3">
+            <h2>3. Read (Read Actively to Answer Your Questions)</h2>
+            <div class="instruction">
+                <p>Read the section carefully, looking for answers to your questions.</p>
+            </div>
+            
+            <div class="checkbox-container">
+                <input type="checkbox" id="read-confirm">
+                <label for="read-confirm">✅ I have read the section and attempted to answer my questions.</label>
+            </div>
+            
+            <div class="btn-container">
+                <button class="btn-prev" data-prev="2">Previous</button>
+                <button class="btn-next" data-next="4">Next: Recite</button>
+            </div>
+        </div>
+        
+        <!-- Recite Section -->
+        <div class="section" id="section-4">
+            <h2>4. Recite (Summarize and Recall Key Points)</h2>
+            <div class="instruction">
+                <p>Without looking at the text, write down or say aloud what you remember.</p>
+            </div>
+            
+            <div class="prompt">
+                <p>What are the three most important points from this section?</p>
+                <textarea placeholder="Type your summary here..."></textarea>
+            </div>
+            
+            <div class="prompt">
+                <p>Can I explain the concept in my own words?</p>
+                <textarea placeholder="Type your explanation here..."></textarea>
+            </div>
+            
+            <div class="prompt">
+                <p>What examples or analogies help me understand this better?</p>
+                <textarea placeholder="Type your examples here..."></textarea>
+            </div>
+            
+            <div class="btn-container">
+                <button class="btn-prev" data-prev="3">Previous</button>
+                <button class="btn-next" data-next="5">Next: Review</button>
+            </div>
+        </div>
+        
+        <!-- Review Section -->
+        <div class="section" id="section-5">
+            <h2>5. Review (Reflect and Reinforce Learning)</h2>
+            <div class="instruction">
+                <p>Go back over the section and your notes to reinforce understanding.</p>
+            </div>
+            
+            <div class="prompt">
+                <p>Did I answer all my initial questions accurately?</p>
+                <textarea placeholder="Reflect on your questions and answers..."></textarea>
+            </div>
+            
+            <div class="prompt">
+                <p>What gaps remain in my understanding?</p>
+                <textarea placeholder="Identify areas that need more study..."></textarea>
+            </div>
+            
+            <div class="prompt">
+                <p>What connections can I make to other topics or real-world applications?</p>
+                <textarea placeholder="Note down connections and applications..."></textarea>
+            </div>
+            
+            <div class="feedback constructive">
+                <p><strong>Review Tip:</strong> Consider revisiting this section in 24 hours and then again in a week to strengthen long-term retention.</p>
+            </div>
+            
+            <div class="btn-container">
+                <button class="btn-prev" data-prev="4">Previous</button>
+                <button class="btn-submit" id="btn-complete">Complete SQ3R Process</button>
+            </div>
+        </div>
+        
+        <footer>
+            <p>SQ3R Study Method Assistant | Designed to enhance learning retention and comprehension</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get all steps and sections
+            const steps = document.querySelectorAll('.step');
+            const sections = document.querySelectorAll('.section');
+            const nextButtons = document.querySelectorAll('.btn-next');
+            const prevButtons = document.querySelectorAll('.btn-prev');
+            const completeButton = document.getElementById('btn-complete');
+            
+            // Set up progress bar
+            const progressBar = document.querySelector('.progress-bar');
+            
+            // Function to update the progress
+            function updateProgress(currentStep) {
+                // Update steps
+                steps.forEach(step => {
+                    const stepNum = parseInt(step.getAttribute('data-step'));
+                    step.classList.remove('active', 'completed');
+                    
+                    if (stepNum === currentStep) {
+                        step.classList.add('active');
+                    } else if (stepNum < currentStep) {
+                        step.classList.add('completed');
+                    }
+                });
+                
+                // Update progress bar
+                const progressPercentage = ((currentStep - 1) / (steps.length - 1)) * 100;
+                progressBar.style.setProperty('--progress', `${progressPercentage}%`);
+                
+                // Update sections
+                sections.forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.getElementById(`section-${currentStep}`).classList.add('active');
+            }
+            
+            // Next button functionality
+            nextButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const nextStep = parseInt(this.getAttribute('data-next'));
+                    updateProgress(nextStep);
+                    
+                    // Scroll to top of section
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            });
+            
+            // Previous button functionality
+            prevButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    if (!this.disabled) {
+                        const prevStep = parseInt(this.getAttribute('data-prev'));
+                        updateProgress(prevStep);
+                        
+                        // Scroll to top of section
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                });
+            });
+            
+            // Complete button functionality
+            completeButton.addEventListener('click', function() {
+                alert('Congratulations! You have completed the SQ3R process. Remember to save your work!');
+                
+                // Here you would typically send data to a server
+                // For now, we'll just log to console
+                console.log('SQ3R process completed');
+            });
+            
+            // Step click functionality
+            steps.forEach(step => {
+                step.addEventListener('click', function() {
+                    const stepNum = parseInt(this.getAttribute('data-step'));
+                    updateProgress(stepNum);
+                });
+            });
+            
+            // Initialize the first step
+            updateProgress(1);
+        });
+    </script>
+</body>
+</html>
